@@ -82,6 +82,7 @@
     font-size: 17px; font-weight: 600;
   }
   .campo::placeholder { color: rgba(36,22,94,.45); font-weight: 500; }
+  .campo[aria-invalid="true"] { border-color: var(--rosa); }
   .campo:focus { outline: none; border-color: var(--amarelo); box-shadow: 0 0 0 3px rgba(255,199,44,.35); }
   .ajuda { color: var(--suave); font-size: 14px; margin: 10px 2px 0; }
   .erro { color: var(--amarelo); font-size: 14px; font-weight: 600; margin: 8px 2px 0; min-height: 20px; }
@@ -453,10 +454,25 @@ function linhasFeitas(marcadas) {
 }
 
 /* ---------- Armazenamento (falha silenciosa) ---------- */
+/* Memória de reserva: se o navegador bloquear o localStorage
+   (aba privada, pré-visualização), o jogo continua funcionando nesta aba. */
+const memoria = new Map();
 const store = {
-  get(k, def) { try { const v = localStorage.getItem(CONFIG.armazenamento + ":" + k); return v == null ? def : JSON.parse(v); } catch { return def; } },
-  set(k, v) { try { localStorage.setItem(CONFIG.armazenamento + ":" + k, JSON.stringify(v)); } catch {} },
-  del(k) { try { localStorage.removeItem(CONFIG.armazenamento + ":" + k); } catch {} }
+  get(k, def) {
+    const chave = CONFIG.armazenamento + ":" + k;
+    try { const v = localStorage.getItem(chave); if (v != null) return JSON.parse(v); } catch {}
+    return memoria.has(chave) ? memoria.get(chave) : def;
+  },
+  set(k, v) {
+    const chave = CONFIG.armazenamento + ":" + k;
+    memoria.set(chave, v);
+    try { localStorage.setItem(chave, JSON.stringify(v)); } catch {}
+  },
+  del(k) {
+    const chave = CONFIG.armazenamento + ":" + k;
+    memoria.delete(chave);
+    try { localStorage.removeItem(chave); } catch {}
+  }
 };
 
 /* ---------- Ícones ---------- */
@@ -495,11 +511,12 @@ function telaEntrada() {
     </section>
     <p class="rodape"><a href="#organizador">Modo organização</a></p>`;
   const form = $("#formNome"), campo = $("#nome");
+  campo.addEventListener("input", () => { campo.removeAttribute("aria-invalid"); $("#erroNome").textContent = ""; });
   form.addEventListener("submit", e => {
     e.preventDefault();
     const bruto = campo.value.trim().replace(/\s+/g, " ");
     const partes = normalizar(bruto).split(" ").filter(Boolean);
-    if (partes.length < 2) { $("#erroNome").textContent = "Digite nome e sobrenome pra gerar uma cartela só sua."; campo.focus(); return; }
+    if (partes.length < 2) { $("#erroNome").textContent = "Digite nome e sobrenome pra gerar uma cartela só sua."; campo.setAttribute("aria-invalid", "true"); campo.focus(); return; }
     store.set("jogador", bruto);
     telaCartela();
   });
