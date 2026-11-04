@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#24165E">
+<title>Bingo Made in Brasil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Shrikhand&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --noite: #24165E;
+    --noite-2: #1A0F47;
+    --branco: #FFFFFF;
+    --amarelo: #FFC72C;
+    --rosa: #FF3D8B;
+    --verde: #00A859;
+    --azul: #2F6BFF;
+    --laranja: #FF7A1A;
+    --tinta: #24165E;
+    --suave: rgba(255,255,255,.72);
+    --linha: rgba(255,255,255,.16);
+    --gutter: 16px;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100dvh;
+    background-color: var(--noite);
+    background-image:
+      radial-gradient(circle at 12% 18%, rgba(255,61,139,.55) 0 3px, transparent 4px),
+      radial-gradient(circle at 78% 9%, rgba(255,199,44,.6) 0 2.5px, transparent 3.5px),
+      radial-gradient(circle at 63% 41%, rgba(0,168,89,.55) 0 3px, transparent 4px),
+      radial-gradient(circle at 30% 66%, rgba(47,107,255,.6) 0 2.5px, transparent 3.5px),
+      radial-gradient(circle at 88% 77%, rgba(255,122,26,.55) 0 3px, transparent 4px),
+      radial-gradient(circle at 46% 92%, rgba(255,199,44,.45) 0 2px, transparent 3px);
+    background-size: 220px 260px;
+    color: var(--branco);
+    font-family: "Archivo", system-ui, sans-serif;
+    font-variation-settings: "wdth" 100;
+    font-size: 16px;
+    line-height: 1.45;
+    overflow-x: hidden;
+  }
+  button, input { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  :focus-visible { outline: 3px solid var(--amarelo); outline-offset: 2px; }
+
+  .folhas { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .folha { position: absolute; width: 190px; height: auto; }
+  .folha.f1 { top: -46px; left: -70px; transform: rotate(32deg); }
+  .folha.f2 { top: -30px; right: -84px; transform: rotate(-128deg) scaleX(-1); width: 170px; }
+  .folha.f3 { bottom: -60px; right: -60px; transform: rotate(-150deg); width: 150px; opacity: .9; }
+
+  main { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 28px) var(--gutter) calc(env(safe-area-inset-bottom) + 32px); }
+
+  /* ---------- Marca ---------- */
+  .marca { text-align: center; margin: 0 0 20px; }
+  .marca .made {
+    font-family: "Shrikhand", serif; font-weight: 400;
+    color: var(--amarelo); font-size: 22px; line-height: 1;
+    display: inline-block; transform: rotate(-4deg); margin-bottom: 2px;
+  }
+  .marca h1 {
+    font-family: "Shrikhand", serif; font-weight: 400;
+    margin: 0; font-size: clamp(64px, 22vw, 96px); line-height: .95; letter-spacing: .01em;
+    color: var(--branco);
+    text-shadow: 3px 3px 0 var(--rosa), 6px 6px 0 var(--laranja), 9px 9px 0 var(--verde);
+    padding-right: 9px;
+  }
+  .marca.compacta { margin-bottom: 14px; }
+  .marca.compacta h1 { font-size: 56px; text-shadow: 2px 2px 0 var(--rosa), 4px 4px 0 var(--laranja), 6px 6px 0 var(--verde); padding-right: 6px; }
+  .marca.compacta .made { font-size: 17px; }
+
+  /* ---------- Entrada ---------- */
+  .entrada { margin-top: 28px; }
+  .entrada label { display: block; font-weight: 700; font-size: 17px; margin-bottom: 8px; }
+  .campo {
+    width: 100%; height: 52px; padding: 0 16px; border-radius: 14px;
+    border: 2px solid transparent; background: var(--branco); color: var(--tinta);
+    font-size: 17px; font-weight: 600;
+  }
+  .campo::placeholder { color: rgba(36,22,94,.45); font-weight: 500; }
+  .campo:focus { outline: none; border-color: var(--amarelo); box-shadow: 0 0 0 3px rgba(255,199,44,.35); }
+  .ajuda { color: var(--suave); font-size: 14px; margin: 10px 2px 0; }
+  .erro { color: var(--amarelo); font-size: 14px; font-weight: 600; margin: 8px 2px 0; min-height: 20px; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; height: 54px; margin-top: 14px; border: 0; border-radius: 14px;
+    background: var(--amarelo); color: var(--tinta);
+    font-weight: 800; font-size: 17px;
+    box-shadow: 0 4px 0 #C98F00;
+    transition: transform .08s, box-shadow .08s;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #C98F00; }
+  .btn.sec { background: transparent; color: var(--branco); box-shadow: inset 0 0 0 2px var(--linha); }
+  .btn.sec:active { transform: none; background: rgba(255,255,255,.06); }
+
+  .regras { margin-top: 32px; padding-top: 20px; border-top: 1px dashed var(--linha); }
+  .regras h2 { font-family: "Shrikhand", serif; font-weight: 400; font-size: 22px; margin: 0 0 10px; color: var(--amarelo); }
+  .regras ol { margin: 0; padding-left: 20px; color: var(--suave); font-size: 15px; }
+  .regras li { margin-bottom: 6px; }
+  .regras strong { color: var(--branco); }
+
+  /* ---------- Cabeçalho da cartela ---------- */
+  .jogador { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .jogador .nome { font-weight: 800; font-size: 19px; line-height: 1.2; overflow-wrap: anywhere; }
+  .jogador .codigo { color: var(--suave); font-size: 14px; font-variant-numeric: tabular-nums; }
+  .jogador .codigo b { color: var(--amarelo); font-weight: 800; letter-spacing: .06em; }
+  .icone-btn {
+    flex: none; width: 44px; height: 44px; border-radius: 12px; border: 0;
+    background: rgba(255,255,255,.1); display: grid; place-items: center;
+  }
+  .icone-btn svg { width: 22px; height: 22px; }
+
+  .placar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .placar > div { background: rgba(255,255,255,.08); border-radius: 12px; padding: 8px 12px; }
+  .placar .n { font-weight: 900; font-size: 22px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .placar .t { font-size: 13px; color: var(--suave); }
+
+  /* ---------- Cartela ---------- */
+  .cartela {
+    background: var(--noite-2); border-radius: 20px; padding: 10px;
+    box-shadow: 0 0 0 3px var(--amarelo), 0 12px 32px rgba(0,0,0,.35);
+  }
+  .letras, .grade { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .letras { margin-bottom: 6px; }
+  .letras span {
+    font-family: "Shrikhand", serif; text-align: center; font-size: 22px; line-height: 34px; height: 34px; border-radius: 10px; color: var(--branco);
+  }
+  .letras span:nth-child(1) { background: var(--rosa); }
+  .letras span:nth-child(2) { background: var(--laranja); }
+  .letras span:nth-child(3) { background: var(--amarelo); color: var(--tinta); }
+  .letras span:nth-child(4) { background: var(--verde); }
+  .letras span:nth-child(5) { background: var(--azul); }
+
+  .casa {
+    position: relative; aspect-ratio: 1; border: 0; border-radius: 10px; padding: 4px;
+    background: var(--branco); color: var(--tinta);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    font-weight: 750; font-variation-settings: "wdth" 72; line-height: 1.08;
+    overflow: hidden; hyphens: manual; -webkit-hyphens: manual; overflow-wrap: normal; word-break: normal;
+    transition: background-color .15s, color .15s;
+    user-select: none; -webkit-user-select: none;
+  }
+  .casa .tt { display: block; width: 100%; }
+  .casa.on { color: var(--branco); }
+  .casa.on.c0 { background: var(--rosa); }
+  .casa.on.c1 { background: var(--laranja); }
+  .casa.on.c2 { background: var(--amarelo); color: var(--tinta); }
+  .casa.on.c3 { background: var(--verde); }
+  .casa.on.c4 { background: var(--azul); }
+  .casa.on::after {
+    content: ""; position: absolute; top: 3px; right: 3px; width: 10px; height: 10px;
+    background: currentColor; opacity: .9;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0l1.3 3.4L10 3.8 7.1 6.1 8.1 10 5 7.8 1.9 10l1-3.9L0 3.8l3.7-.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M5 0l1.3 3.4L10 3.8 7.1 6.1 8.1 10 5 7.8 1.9 10l1-3.9L0 3.8l3.7-.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  .casa.pop { animation: pop .22s ease-out; }
+  @keyframes pop { 0% { transform: scale(.88); } 60% { transform: scale(1.05); } 100% { transform: scale(1); } }
+  .casa.livre {
+    background: var(--amarelo); color: var(--tinta); cursor: default;
+    flex-direction: column; gap: 1px;
+  }
+  .casa.livre svg { width: 58%; height: auto; }
+  .casa.livre small { font-size: 9px; font-weight: 850; font-variation-settings: "wdth" 80; letter-spacing: .02em; }
+  .casa.linha-feita { box-shadow: 0 0 0 2px var(--branco); }
+
+  /* ---------- Lista ---------- */
+  .lista { margin-top: 28px; }
+  .lista-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .lista h2 { font-family: "Shrikhand", serif; font-weight: 400; font-size: 22px; margin: 0; color: var(--amarelo); }
+  .lista-topo span { font-size: 13px; color: var(--suave); }
+  .musicas { list-style: none; margin: 0; padding: 0; border-radius: 14px; overflow: hidden; background: #2E2170; }
+  .musicas li + li { border-top: 1px solid var(--linha); }
+  .item {
+    width: 100%; min-height: 56px; border: 0; background: none; text-align: left;
+    display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 12px; padding: 10px 14px;
+  }
+  .item .chk { width: 26px; height: 26px; border-radius: 8px; box-shadow: inset 0 0 0 2px rgba(255,255,255,.4); display: grid; place-items: center; }
+  .item .chk svg { width: 16px; height: 16px; opacity: 0; }
+  .item.on .chk { background: var(--amarelo); box-shadow: none; }
+  .item.on .chk svg { opacity: 1; }
+  .item .tit { display: block; font-weight: 700; font-size: 16px; line-height: 1.25; }
+  .item .art { display: block; font-size: 14px; color: var(--suave); line-height: 1.3; margin-top: 1px; }
+  .item.on .tit { color: var(--amarelo); }
+  .genero { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 99px; white-space: nowrap; color: var(--tinta); }
+
+  .rodape { margin-top: 28px; text-align: center; font-size: 13px; color: var(--suave); }
+  .rodape a { color: var(--suave); }
+
+  /* ---------- Folha de opções / modais ---------- */
+  .veu { position: fixed; inset: 0; z-index: 20; background: rgba(10,5,35,.72); display: none; align-items: flex-end; justify-content: center; }
+  .veu.aberto { display: flex; }
+  .folha-modal {
+    width: 100%; max-width: 480px; background: var(--noite); border-radius: 22px 22px 0 0;
+    padding: 22px var(--gutter) calc(env(safe-area-inset-bottom) + 22px);
+    box-shadow: 0 -3px 0 var(--amarelo);
+  }
+  .folha-modal h3 { margin: 0 0 6px; font-size: 20px; font-weight: 800; }
+  .folha-modal p { margin: 0 0 6px; color: var(--suave); font-size: 15px; }
+
+  .veu.festa { align-items: center; padding: var(--gutter); }
+  .festa-card {
+    width: 100%; max-width: 400px; text-align: center; background: var(--branco); color: var(--tinta);
+    border-radius: 24px; padding: 28px 20px 20px; box-shadow: 0 0 0 4px var(--amarelo), 8px 8px 0 4px var(--rosa);
+  }
+  .festa-card .grito { font-family: "Shrikhand", serif; font-size: 44px; line-height: 1; margin: 0 0 10px; color: var(--rosa); }
+  .festa-card p { margin: 0 0 4px; font-size: 16px; }
+  .festa-card .quem { font-weight: 800; font-size: 20px; margin-top: 14px; }
+  .festa-card .cod { font-size: 15px; }
+  .festa-card .cod b { letter-spacing: .08em; }
+  .festa-card .btn { box-shadow: 0 4px 0 #C98F00; }
+  canvas#confete { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+
+  /* ---------- Organizador ---------- */
+  .abas { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: rgba(255,255,255,.08); padding: 4px; border-radius: 14px; margin-bottom: 16px; }
+  .abas button { height: 42px; border: 0; border-radius: 10px; background: none; font-weight: 700; color: var(--suave); }
+  .abas button[aria-selected="true"] { background: var(--amarelo); color: var(--tinta); }
+  .grupo h4 { margin: 20px 2px 8px; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+  .grupo h4 i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .resultado { margin-top: 16px; }
+  .resultado .status { background: rgba(255,255,255,.08); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+  .resultado .status b { color: var(--amarelo); }
+  .vazio { color: var(--suave); text-align: center; padding: 24px 8px; font-size: 15px; }
+  .topo-org { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .topo-org a { color: var(--suave); font-size: 14px; }
+
+  [hidden] { display: none !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .casa.pop { animation: none; }
+    .btn, .casa { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="folhas" aria-hidden="true">
+  <svg class="folha f1" viewBox="0 0 200 120"><path d="M4 60 C40 8 140 0 196 58 C140 116 40 112 4 60Z" fill="#00A859"/><path d="M4 60 L196 58" stroke="#0B7A44" stroke-width="3"/><g stroke="#24165E" stroke-width="4" stroke-linecap="round"><path d="M60 59 L48 26"/><path d="M90 59 L82 16"/><path d="M120 59 L118 18"/><path d="M150 58 L156 28"/><path d="M60 61 L50 94"/><path d="M90 61 L84 104"/><path d="M120 61 L120 102"/><path d="M150 60 L156 90"/></g></svg>
+  <svg class="folha f2" viewBox="0 0 200 120"><path d="M4 60 C40 8 140 0 196 58 C140 116 40 112 4 60Z" fill="#00A859"/><path d="M4 60 L196 58" stroke="#0B7A44" stroke-width="3"/><g stroke="#24165E" stroke-width="4" stroke-linecap="round"><path d="M60 59 L48 26"/><path d="M90 59 L82 16"/><path d="M120 59 L118 18"/><path d="M150 58 L156 28"/><path d="M60 61 L50 94"/><path d="M90 61 L84 104"/><path d="M120 61 L120 102"/><path d="M150 60 L156 90"/></g></svg>
+  <svg class="folha f3" viewBox="0 0 200 120"><path d="M4 60 C40 8 140 0 196 58 C140 116 40 112 4 60Z" fill="#0B7A44"/><path d="M4 60 L196 58" stroke="#00A859" stroke-width="3"/></svg>
+</div>
+
+<main id="app"></main>
+
+<div class="veu" id="veuOpcoes" role="dialog" aria-modal="true" aria-labelledby="opTit">
+  <div class="folha-modal">
+    <h3 id="opTit">Opções</h3>
+    <p>Sua cartela depende do nome. Trocar o nome gera outra cartela e apaga as marcações desta.</p>
+    <button class="btn sec" id="opLimpar">Desmarcar tudo</button>
+    <button class="btn sec" id="opTrocar">Trocar de nome</button>
+    <button class="btn" id="opFechar">Voltar pra cartela</button>
+  </div>
+</div>
+
+<div class="veu festa" id="veuFesta" role="dialog" aria-modal="true" aria-labelledby="festaTit">
+  <div class="festa-card">
+    <p class="grito" id="festaTit">Bingo!</p>
+    <p id="festaTxt">Você fechou uma linha.</p>
+    <p class="quem" id="festaQuem"></p>
+    <p class="cod">Cartela <b id="festaCod"></b></p>
+    <p style="margin-top:12px;font-size:14px;opacity:.75">Mostre esta tela pra organização conferir.</p>
+    <button class="btn" id="festaOk">Continuar jogando</button>
+  </div>
+</div>
+
+<canvas id="confete" hidden></canvas>
+
+<script>
+/* =========================================================
+   CONFIGURAÇÃO
+   Trocar SALT gera cartelas totalmente novas pra todo mundo.
+   ========================================================= */
+const CONFIG = {
+  salt: "made-in-brasil-2026",
+  armazenamento: "bingo-mib-2026"
+};
+
+/* g: m = MPB & Brega, s = Samba & Pagode, a = Axé, f = Funk & Pop,
+      t = Sertanejo, n = Forró & Piseiro, r = Rock nacional */
+const GENEROS = {
+  m: { nome: "MPB & Brega",     cor: "#FF7A1A" },
+  s: { nome: "Samba & Pagode",  cor: "#FFC72C" },
+  a: { nome: "Axé",             cor: "#FF3D8B" },
+  f: { nome: "Funk & Pop",      cor: "#B7A4FF" },
+  t: { nome: "Sertanejo",       cor: "#00D26A" },
+  n: { nome: "Forró & Piseiro", cor: "#FFE08A" },
+  r: { nome: "Rock nacional",   cor: "#7FB2FF" }
+};
+
+const MUSICAS = [
+  // MPB & Brega
+  ["País Tropical", "Jorge Ben Jor", "m"],
+  ["Taj Mahal", "Jorge Ben Jor", "m"],
+  ["Mas Que Nada", "Jorge Ben Jor", "m"],
+  ["Do Leme ao Pontal", "Tim Maia", "m"],
+  ["Descobridor dos Sete Mares", "Tim Maia", "m"],
+  ["Sossego", "Tim Maia", "m"],
+  ["Lança Perfume", "Rita Lee", "m"],
+  ["Olhos Coloridos", "Sandra de Sá", "m"],
+  ["Chorando Se Foi", "Kaoma", "m"],
+  ["Fogo e Paixão", "Wando", "m"],
+  ["Garçom", "Reginaldo Rossi", "m"],
+  ["Eva", "Rádio Táxi", "m"],
+  // Samba & Pagode
+  ["Vou Festejar", "Beth Carvalho", "s"],
+  ["Deixa a Vida Me Levar", "Zeca Pagodinho", "s"],
+  ["Cheia de Manias", "Raça Negra", "s"],
+  ["Cilada", "Molejo", "s"],
+  ["Que Se Chama Amor", "Só Pra Contrariar", "s"],
+  ["Tá Escrito", "Revelação", "s"],
+  ["Livre Pra Voar", "Exaltasamba", "s"],
+  ["Assim Você Mata o Papai", "Sorriso Maroto", "s"],
+  ["Lancinho", "Turma do Pagode", "s"],
+  ["Ousadia e Alegria", "Thiaguinho", "s"],
+  ["P do Pecado", "Menos É Mais e Simone Mendes", "s"],
+  ["Lapada Dela", "Grupo Menos É Mais", "s"],
+  ["Coração Partido", "Grupo Menos É Mais", "s"],
+  ["Pela Última Vez", "Menos É Mais e Nattan", "s"],
+  // Axé
+  ["Festa", "Ivete Sangalo", "a"],
+  ["Sorte Grande", "Ivete Sangalo", "a"],
+  ["O Canto da Cidade", "Daniela Mercury", "a"],
+  ["Beleza Rara", "Banda Eva", "a"],
+  ["Dança da Manivela", "Asa de Águia", "a"],
+  ["Segura o Tchan", "É o Tchan", "a"],
+  ["Na Boquinha da Garrafa", "Companhia do Pagode", "a"],
+  ["Faraó", "Margareth Menezes", "a"],
+  ["Rebolation", "Parangolé", "a"],
+  ["Lepo Lepo", "Psirico", "a"],
+  ["Macetando", "Ivete Sangalo e Ludmilla", "a"],
+  ["Zona de Perigo", "Léo Santana", "a"],
+  ["Desliza", "Léo Santana e Melody", "a"],
+  // Funk & Pop
+  ["Rap da Felicidade", "Cidinho e Doca", "f"],
+  ["Fico Assim Sem Você", "Claudinho e Buchecha", "f"],
+  ["Só Love", "Claudinho e Buchecha", "f"],
+  ["Cerol na Mão", "Bonde do Tigrão", "f"],
+  ["Glamurosa", "MC Marcinho", "f"],
+  ["Festa no Apê", "Latino", "f"],
+  ["Baba", "Kelly Key", "f"],
+  ["Se Ela Dança, Eu Danço", "MC Leozinho", "f"],
+  ["Show das Poderosas", "Anitta", "f"],
+  ["Envolver", "Anitta", "f"],
+  ["Gostosin", "Anitta, Felipe Amorim e Hitmaker", "f"],
+  ["K.O.", "Pabllo Vittar", "f"],
+  ["Bum Bum Tam Tam", "MC Fioti", "f"],
+  ["Olha a Explosão", "MC Kevinho", "f"],
+  ["Tá OK", "Dennis e MC Kevin o Chris", "f"],
+  ["Jetski", "Pedro Sampaio, MC Meno K e Melody", "f"],
+  ["Sequência Feiticeira", "Pedro Sampaio", "f"],
+  ["Posso Até Não Te Dar Flores", "DJ Japa NK e MC Ryan SP", "f"],
+  // Sertanejo
+  ["Evidências", "Chitãozinho e Xororó", "t"],
+  ["Ai Se Eu Te Pego", "Michel Teló", "t"],
+  ["Balada", "Gusttavo Lima", "t"],
+  ["Camaro Amarelo", "Munhoz e Mariano", "t"],
+  ["Infiel", "Marília Mendonça", "t"],
+  ["Liberdade Provisória", "Henrique e Juliano", "t"],
+  ["Atrasadinha", "Felipe Araújo e Ferrugem", "t"],
+  ["Largado às Traças", "Zé Neto e Cristiano", "t"],
+  ["Tubarões", "Diego e Victor Hugo", "t"],
+  ["Eu Te Seguro", "Panda", "t"],
+  ["Sua Boca Mente", "Zé Felipe e Ana Castela", "t"],
+  ["Pipoco", "Ana Castela, Melody e DJ Chris no Beat", "t"],
+  ["Vagabundo", "Gusttavo Lima e Luis Fonsi", "t"],
+  ["Ama Um Maloqueiro", "Hugo e Guilherme, Rafa e Junior", "t"],
+  // Forró & Piseiro
+  ["Xote dos Milagres", "Falamansa", "n"],
+  ["Esperando na Janela", "Gilberto Gil", "n"],
+  ["Anunciação", "Alceu Valença", "n"],
+  ["Asa Branca", "Luiz Gonzaga", "n"],
+  ["Morango do Nordeste", "Lairton", "n"],
+  ["Basta Você Me Ligar", "Barões da Pisadinha e Xand Avião", "n"],
+  ["Eu Me Apaixonei", "Vitinho Imperador", "n"],
+  ["Camarote", "Wesley Safadão", "n"],
+  // Rock nacional
+  ["Anna Júlia", "Los Hermanos", "r"],
+  ["Garota Nacional", "Skank", "r"],
+  ["Exagerado", "Cazuza", "r"],
+  ["Pro Dia Nascer Feliz", "Barão Vermelho", "r"],
+  ["Pelados em Santos", "Mamonas Assassinas", "r"],
+  ["Tempo Perdido", "Legião Urbana", "r"],
+  ["Proibida pra Mim", "Charlie Brown Jr.", "r"],
+  ["Mulher de Fases", "Raimundos", "r"],
+  ["Uma Brasileira", "Os Paralamas do Sucesso", "r"],
+  ["Primeiros Erros", "Capital Inicial", "r"]
+].map(([titulo, artista, g], id) => ({ id, titulo, artista, g }));
+
+/* ---------- Utilidades ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const normalizar = n => n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9 ]/g, " ").replace(/\s+/g, " ").trim();
+const reduzMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function hash32(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+  return h >>> 0;
+}
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function embaralhar(arr, rnd) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const ALFA = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function codigoDe(nomeNorm) {
+  let h = hash32("cod|" + CONFIG.salt + "|" + nomeNorm), s = "";
+  for (let i = 0; i < 4; i++) { s += ALFA[h % ALFA.length]; h = Math.floor(h / ALFA.length) ^ (h << 5); h >>>= 0; }
+  return s;
+}
+
+/* Gera 24 músicas equilibradas entre gêneros, determinadas pelo nome. */
+function gerarCartela(nomeNorm) {
+  const rnd = mulberry32(hash32(CONFIG.salt + "|" + nomeNorm));
+  const porGenero = {};
+  MUSICAS.forEach(m => (porGenero[m.g] ||= []).push(m));
+  const total = MUSICAS.length, vagas = 24;
+  const cotas = Object.keys(porGenero).map(g => {
+    const exato = vagas * porGenero[g].length / total;
+    return { g, n: Math.floor(exato), resto: exato - Math.floor(exato) + rnd() * 0.5 };
+  });
+  let falta = vagas - cotas.reduce((s, c) => s + c.n, 0);
+  cotas.sort((a, b) => b.resto - a.resto);
+  for (let i = 0; falta > 0; i++, falta--) cotas[i % cotas.length].n++;
+  let escolhidas = [];
+  cotas.forEach(c => { escolhidas = escolhidas.concat(embaralhar(porGenero[c.g], rnd).slice(0, c.n)); });
+  escolhidas = embaralhar(escolhidas, rnd);
+  const grade = escolhidas.slice(0, 12).map(m => m.id);
+  grade.push(-1); // casa livre no centro
+  return grade.concat(escolhidas.slice(12).map(m => m.id));
+}
+
+const LINHAS = (() => {
+  const L = [];
+  for (let r = 0; r < 5; r++) L.push([0,1,2,3,4].map(c => r * 5 + c));
+  for (let c = 0; c < 5; c++) L.push([0,1,2,3,4].map(r => r * 5 + c));
+  L.push([0,6,12,18,24], [4,8,12,16,20]);
+  return L;
+})();
+function linhasFeitas(marcadas) {
+  return LINHAS.filter(l => l.every(i => i === 12 || marcadas.has(i)));
+}
+
+/* ---------- Armazenamento (falha silenciosa) ---------- */
+const store = {
+  get(k, def) { try { const v = localStorage.getItem(CONFIG.armazenamento + ":" + k); return v == null ? def : JSON.parse(v); } catch { return def; } },
+  set(k, v) { try { localStorage.setItem(CONFIG.armazenamento + ":" + k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(CONFIG.armazenamento + ":" + k); } catch {} }
+};
+
+/* ---------- Ícones ---------- */
+const IC = {
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
+  check: '<svg viewBox="0 0 16 16" fill="none" stroke="#24165E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>',
+  sol: '<svg viewBox="0 0 40 40" aria-hidden="true"><g fill="#24165E"><circle cx="20" cy="20" r="8"/>' +
+       Array.from({length: 12}, (_, i) => `<path transform="rotate(${i*30} 20 20)" d="M18.6 3h2.8l-1.4 7z"/>`).join("") + '</g></svg>'
+};
+
+/* =========================================================
+   TELA: entrada
+   ========================================================= */
+function telaEntrada() {
+  document.title = "Bingo Made in Brasil";
+  $("#app").innerHTML = `
+    <header class="marca">
+      <span class="made">Made in Brasil</span>
+      <h1>Bingo</h1>
+    </header>
+    <form class="entrada" id="formNome" novalidate>
+      <label for="nome">Seu nome e sobrenome</label>
+      <input class="campo" id="nome" name="nome" autocomplete="name" autocapitalize="words" placeholder="Ex.: Ana Souza" maxlength="60">
+      <p class="erro" id="erroNome" role="alert"></p>
+      <button class="btn" type="submit">Gerar minha cartela</button>
+      <p class="ajuda">Cada nome gera uma cartela própria, e é por ele que a organização confere o seu bingo. Use o mesmo nome em qualquer aparelho e a cartela será a mesma.</p>
+    </form>
+    <section class="regras">
+      <h2>Como jogar</h2>
+      <ol>
+        <li>Tocou uma música da sua cartela? <strong>Toque na casa</strong> pra marcar.</li>
+        <li>Fechou uma linha, coluna ou diagonal: <strong>bingo de linha</strong>.</li>
+        <li>Marcou as 24 músicas: <strong>cartela cheia</strong>, o prêmio grande.</li>
+        <li>Mostre a tela pra organização, que confere pelo seu nome.</li>
+      </ol>
+    </section>
+    <p class="rodape"><a href="#organizador">Modo organização</a></p>`;
+  const form = $("#formNome"), campo = $("#nome");
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+    const bruto = campo.value.trim().replace(/\s+/g, " ");
+    const partes = normalizar(bruto).split(" ").filter(Boolean);
+    if (partes.length < 2) { $("#erroNome").textContent = "Digite nome e sobrenome pra gerar uma cartela só sua."; campo.focus(); return; }
+    store.set("jogador", bruto);
+    telaCartela();
+  });
+}
+
+/* =========================================================
+   TELA: cartela do jogador
+   ========================================================= */
+let estado = null;
+
+function telaCartela() {
+  const nome = store.get("jogador", null);
+  if (!nome) return telaEntrada();
+  const norm = normalizar(nome);
+  const grade = gerarCartela(norm);
+  const marcadas = new Set(store.get("marcas:" + norm, []));
+  const avisos = store.get("avisos:" + norm, { linhas: 0, cheia: false });
+  estado = { nome, norm, grade, marcadas, avisos, codigo: codigoDe(norm) };
+  document.title = "Bingo · " + nome.split(" ")[0];
+
+  $("#app").innerHTML = `
+    <header class="marca compacta">
+      <span class="made">Made in Brasil</span>
+      <h1>Bingo</h1>
+    </header>
+    <div class="jogador">
+      <div>
+        <div class="nome">${esc(nome)}</div>
+        <div class="codigo">Cartela <b>${estado.codigo}</b></div>
+      </div>
+      <button class="icone-btn" id="abrirOpcoes" aria-label="Opções">${IC.menu}</button>
+    </div>
+    <div class="placar">
+      <div><div class="n" id="nMarcadas">0/24</div><div class="t">músicas marcadas</div></div>
+      <div><div class="n" id="nLinhas">0</div><div class="t">linhas fechadas</div></div>
+    </div>
+    <section class="cartela" aria-label="Sua cartela">
+      <div class="letras" aria-hidden="true"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
+      <div class="grade" id="grade"></div>
+    </section>
+    <section class="lista">
+      <div class="lista-topo"><h2>Suas músicas</h2><span>Em ordem alfabética</span></div>
+      <ul class="musicas" id="lista"></ul>
+    </section>
+    <p class="rodape"><a href="#organizador">Modo organização</a></p>`;
+
+  const gradeEl = $("#grade");
+  gradeEl.innerHTML = grade.map((id, i) => {
+    if (id === -1) return `<div class="casa livre" aria-label="Casa livre">${IC.sol}<small>LIVRE</small></div>`;
+    const m = MUSICAS[id];
+    return `<button class="casa c${(i * 2 + Math.floor(i / 5)) % 5}" data-i="${i}" aria-pressed="false" aria-label="${esc(m.titulo)}, ${esc(m.artista)}"><span class="tt">${esc(m.titulo)}</span></button>`;
+  }).join("");
+
+  const ordem = grade.map((id, i) => ({ id, i })).filter(x => x.id !== -1)
+    .sort((a, b) => MUSICAS[a.id].titulo.localeCompare(MUSICAS[b.id].titulo, "pt-BR"));
+  $("#lista").innerHTML = ordem.map(({ id, i }) => {
+    const m = MUSICAS[id], g = GENEROS[m.g];
+    return `<li><button class="item" data-i="${i}" aria-pressed="false">
+      <span class="chk">${IC.check}</span>
+      <span><span class="tit">${esc(m.titulo)}</span><span class="art">${esc(m.artista)}</span></span>
+      <span class="genero" style="background:${g.cor}">${g.nome}</span>
+    </button></li>`;
+  }).join("");
+
+  $("#app").addEventListener("click", aoTocar);
+  $("#abrirOpcoes").addEventListener("click", () => abrir("#veuOpcoes"));
+  atualizar(false);
+  ajustarTextos();
+}
+
+function aoTocar(e) {
+  const alvo = e.target.closest("[data-i]");
+  if (!alvo || !estado) return;
+  const i = +alvo.dataset.i;
+  if (estado.marcadas.has(i)) estado.marcadas.delete(i); else estado.marcadas.add(i);
+  store.set("marcas:" + estado.norm, [...estado.marcadas]);
+  const casa = $(`.casa[data-i="${i}"]`);
+  if (casa && !reduzMovimento) { casa.classList.remove("pop"); void casa.offsetWidth; casa.classList.add("pop"); }
+  atualizar(true);
+}
+
+function atualizar(podeComemorar) {
+  const { marcadas, avisos } = estado;
+  document.querySelectorAll("[data-i]").forEach(el => {
+    const on = marcadas.has(+el.dataset.i);
+    el.classList.toggle("on", on);
+    el.setAttribute("aria-pressed", on);
+  });
+  const feitas = linhasFeitas(marcadas);
+  const naLinha = new Set(feitas.flat());
+  document.querySelectorAll(".casa").forEach((el, idx) => el.classList.toggle("linha-feita", naLinha.has(idx) && idx !== 12));
+  $("#nMarcadas").textContent = `${marcadas.size}/24`;
+  $("#nLinhas").textContent = feitas.length;
+
+  if (!podeComemorar) return;
+  const cheia = marcadas.size === 24;
+  if (cheia && !avisos.cheia) {
+    avisos.cheia = true; avisos.linhas = Math.max(avisos.linhas, feitas.length);
+    comemorar("Cartela cheia!", "Você marcou as 24 músicas.");
+  } else if (feitas.length > avisos.linhas) {
+    avisos.linhas = feitas.length;
+    comemorar("Bingo!", feitas.length === 1 ? "Você fechou uma linha." : `Você fechou ${feitas.length} linhas.`);
+  }
+  if (!cheia) avisos.cheia = false;
+  if (feitas.length < avisos.linhas) avisos.linhas = feitas.length;
+  store.set("avisos:" + estado.norm, avisos);
+}
+
+/* Ajusta o tamanho da fonte de cada casa pra caber sem cortar. */
+function ajustarTextos() {
+  document.querySelectorAll(".casa:not(.livre)").forEach(casa => {
+    const tt = casa.firstElementChild;
+    const lado = casa.clientWidth;
+    let tam = Math.min(15, Math.max(10, lado * 0.2));
+    tt.style.fontSize = tam + "px";
+    const limite = casa.clientHeight - 8;
+    while ((tt.scrollHeight > limite || tt.scrollWidth > casa.clientWidth - 8) && tam > 7.5) {
+      tam -= 0.5; tt.style.fontSize = tam + "px";
+    }
+  });
+}
+let tRes;
+addEventListener("resize", () => { clearTimeout(tRes); tRes = setTimeout(ajustarTextos, 120); });
+if (document.fonts) document.fonts.ready.then(ajustarTextos);
+
+/* ---------- Modais ---------- */
+function abrir(sel) { $(sel).classList.add("aberto"); const b = $(sel + " .btn"); b && b.focus(); }
+function fechar(sel) { $(sel).classList.remove("aberto"); }
+document.querySelectorAll(".veu").forEach(v => v.addEventListener("click", e => { if (e.target === v) v.classList.remove("aberto"); }));
+addEventListener("keydown", e => { if (e.key === "Escape") document.querySelectorAll(".veu.aberto").forEach(v => v.classList.remove("aberto")); });
+$("#opFechar").addEventListener("click", () => fechar("#veuOpcoes"));
+$("#opLimpar").addEventListener("click", () => {
+  if (!confirm("Desmarcar todas as músicas da sua cartela?")) return;
+  estado.marcadas.clear(); store.set("marcas:" + estado.norm, []);
+  estado.avisos = { linhas: 0, cheia: false }; store.set("avisos:" + estado.norm, estado.avisos);
+  atualizar(false); fechar("#veuOpcoes");
+});
+$("#opTrocar").addEventListener("click", () => {
+  if (!confirm("Trocar de nome gera uma cartela diferente. Continuar?")) return;
+  store.del("marcas:" + estado.norm); store.del("avisos:" + estado.norm); store.del("jogador");
+  fechar("#veuOpcoes"); estado = null; telaEntrada();
+});
+$("#festaOk").addEventListener("click", () => fechar("#veuFesta"));
+
+function comemorar(titulo, texto) {
+  $("#festaTit").textContent = titulo;
+  $("#festaTxt").textContent = texto;
+  $("#festaQuem").textContent = estado.nome;
+  $("#festaCod").textContent = estado.codigo;
+  abrir("#veuFesta");
+  if (navigator.vibrate) navigator.vibrate([60, 40, 120]);
+  confete();
+}
+
+function confete() {
+  if (reduzMovimento) return;
+  const cv = $("#confete"), ctx = cv.getContext("2d");
+  const dpr = devicePixelRatio || 1;
+  cv.hidden = false; cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+  const cores = ["#FF3D8B", "#FFC72C", "#00A859", "#2F6BFF", "#FF7A1A", "#FFFFFF"];
+  const ps = Array.from({ length: 160 }, () => ({
+    x: innerWidth / 2 + (Math.random() - .5) * 80, y: innerHeight * .45,
+    vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4,
+    w: 6 + Math.random() * 6, h: 3 + Math.random() * 4, r: Math.random() * 6, vr: (Math.random() - .5) * .4,
+    c: cores[Math.floor(Math.random() * cores.length)]
+  }));
+  const t0 = performance.now();
+  (function quadro(t) {
+    const dt = t - t0;
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    ps.forEach(p => {
+      p.vy += .32; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+      ctx.globalAlpha = Math.max(0, 1 - dt / 2600); ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    });
+    if (dt < 2600) requestAnimationFrame(quadro); else { ctx.clearRect(0, 0, innerWidth, innerHeight); cv.hidden = true; }
+  })(t0);
+}
+
+/* =========================================================
+   TELA: organização
+   Marca o que tocou (salvo neste aparelho) e confere cartelas
+   pelo nome — o resultado vem do que tocou de verdade,
+   não do que o jogador marcou.
+   ========================================================= */
+function telaOrganizador() {
+  document.title = "Bingo · Organização";
+  const tocadas = new Set(store.get("org:tocadas", []));
+  $("#app").innerHTML = `
+    <header class="marca compacta"><span class="made">Made in Brasil</span><h1>Bingo</h1></header>
+    <div class="topo-org"><strong id="nTocadas"></strong><a href="#">Voltar pra cartela</a></div>
+    <div class="abas" role="tablist">
+      <button role="tab" aria-selected="true" data-aba="tocou">O que tocou</button>
+      <button role="tab" aria-selected="false" data-aba="conferir">Conferir cartela</button>
+    </div>
+    <section id="abaTocou">
+      <input class="campo" id="busca" type="search" placeholder="Buscar música ou artista" autocomplete="off">
+      <div id="grupos"></div>
+      <button class="btn sec" id="zerar" style="margin-top:24px">Zerar músicas tocadas</button>
+    </section>
+    <section id="abaConferir" hidden>
+      <form id="formConf" novalidate>
+        <label for="nomeConf" style="display:block;font-weight:700;margin-bottom:8px">Nome do jogador, como ele digitou</label>
+        <input class="campo" id="nomeConf" autocomplete="off" autocapitalize="words" placeholder="Ex.: Ana Souza">
+        <button class="btn" type="submit">Conferir</button>
+      </form>
+      <div class="resultado" id="resultado"></div>
+    </section>`;
+
+  const contar = () => { $("#nTocadas").textContent = `${tocadas.size} de ${MUSICAS.length} tocadas`; };
+
+  function desenharGrupos(filtro = "") {
+    const f = normalizar(filtro);
+    $("#grupos").innerHTML = Object.entries(GENEROS).map(([g, info]) => {
+      const itens = MUSICAS.filter(m => m.g === g && (!f || normalizar(m.titulo + " " + m.artista).includes(f)));
+      if (!itens.length) return "";
+      return `<div class="grupo"><h4><i style="background:${info.cor}"></i>${info.nome}</h4>
+        <ul class="musicas">${itens.map(m => `<li><button class="item${tocadas.has(m.id) ? " on" : ""}" data-m="${m.id}" aria-pressed="${tocadas.has(m.id)}">
+          <span class="chk">${IC.check}</span>
+          <span><span class="tit">${esc(m.titulo)}</span><span class="art">${esc(m.artista)}</span></span><span></span>
+        </button></li>`).join("")}</ul></div>`;
+    }).join("") || `<p class="vazio">Nenhuma música com “${esc(filtro)}”.</p>`;
+  }
+
+  desenharGrupos(); contar();
+  $("#busca").addEventListener("input", e => desenharGrupos(e.target.value));
+  $("#grupos").addEventListener("click", e => {
+    const b = e.target.closest("[data-m]"); if (!b) return;
+    const id = +b.dataset.m;
+    tocadas.has(id) ? tocadas.delete(id) : tocadas.add(id);
+    store.set("org:tocadas", [...tocadas]);
+    b.classList.toggle("on", tocadas.has(id)); b.setAttribute("aria-pressed", tocadas.has(id));
+    contar();
+  });
+  $("#zerar").addEventListener("click", () => {
+    if (!confirm("Zerar todas as músicas marcadas como tocadas?")) return;
+    tocadas.clear(); store.set("org:tocadas", []); desenharGrupos($("#busca").value); contar();
+  });
+
+  document.querySelectorAll("[data-aba]").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-aba]").forEach(x => x.setAttribute("aria-selected", x === b));
+    $("#abaTocou").hidden = b.dataset.aba !== "tocou";
+    $("#abaConferir").hidden = b.dataset.aba !== "conferir";
+  }));
+
+  $("#formConf").addEventListener("submit", e => {
+    e.preventDefault();
+    const nome = $("#nomeConf").value.trim();
+    const norm = normalizar(nome);
+    if (!norm) { $("#resultado").innerHTML = `<p class="vazio">Digite o nome do jogador.</p>`; return; }
+    const grade = gerarCartela(norm);
+    const valendo = new Set(grade.map((id, i) => (id !== -1 && tocadas.has(id)) ? i : null).filter(i => i !== null));
+    const feitas = linhasFeitas(valendo);
+    const naLinha = new Set(feitas.flat());
+    const cheia = valendo.size === 24;
+    $("#resultado").innerHTML = `
+      <div class="status">
+        Cartela <b>${codigoDe(norm)}</b> confere com a tela do jogador?<br>
+        ${valendo.size}/24 músicas já tocaram, ${feitas.length} ${feitas.length === 1 ? "linha fechada" : "linhas fechadas"}.
+        ${cheia ? "<br><b>Cartela cheia válida.</b>" : feitas.length ? "<br><b>Bingo de linha válido.</b>" : ""}
+      </div>
+      <section class="cartela">
+        <div class="letras" aria-hidden="true"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
+        <div class="grade">${grade.map((id, i) => {
+          if (id === -1) return `<div class="casa livre">${IC.sol}<small>LIVRE</small></div>`;
+          const on = valendo.has(i);
+          return `<div class="casa c${(i * 2 + Math.floor(i / 5)) % 5}${on ? " on" : ""}${naLinha.has(i) ? " linha-feita" : ""}"><span class="tt">${esc(MUSICAS[id].titulo)}</span></div>`;
+        }).join("")}</div>
+      </section>`;
+    ajustarTextos();
+  });
+}
+
+/* ---------- Roteamento ---------- */
+function rota() {
+  estado = null;
+  const app = $("#app"), novo = app.cloneNode(false);
+  app.replaceWith(novo); // remove ouvintes antigos
+  if (location.hash === "#organizador") telaOrganizador();
+  else if (store.get("jogador", null)) telaCartela();
+  else telaEntrada();
+  scrollTo(0, 0);
+}
+addEventListener("hashchange", rota);
+rota();
+</script>
+</body>
+</html>
