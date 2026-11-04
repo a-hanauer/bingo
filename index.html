@@ -107,8 +107,6 @@
   /* ---------- Cabeçalho da cartela ---------- */
   .jogador { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
   .jogador .nome { font-weight: 800; font-size: 19px; line-height: 1.2; overflow-wrap: anywhere; }
-  .jogador .codigo { color: var(--suave); font-size: 14px; font-variant-numeric: tabular-nums; }
-  .jogador .codigo b { color: var(--amarelo); font-weight: 800; letter-spacing: .06em; }
   .icone-btn {
     flex: none; width: 44px; height: 44px; border-radius: 12px; border: 0;
     background: rgba(255,255,255,.1); display: grid; place-items: center;
@@ -188,8 +186,6 @@
   .item.on .tit { color: var(--amarelo); }
   .genero { font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 99px; white-space: nowrap; color: var(--tinta); }
 
-  .rodape { margin-top: 28px; text-align: center; font-size: 13px; color: var(--suave); }
-  .rodape a { color: var(--suave); }
 
   /* ---------- Folha de opções / modais ---------- */
   .veu { position: fixed; inset: 0; z-index: 20; background: rgba(10,5,35,.72); display: none; align-items: flex-end; justify-content: center; }
@@ -210,23 +206,8 @@
   .festa-card .grito { font-family: "Shrikhand", serif; font-size: 44px; line-height: 1; margin: 0 0 10px; color: var(--rosa); }
   .festa-card p { margin: 0 0 4px; font-size: 16px; }
   .festa-card .quem { font-weight: 800; font-size: 20px; margin-top: 14px; }
-  .festa-card .cod { font-size: 15px; }
-  .festa-card .cod b { letter-spacing: .08em; }
   .festa-card .btn { box-shadow: 0 4px 0 #C98F00; }
   canvas#confete { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
-
-  /* ---------- Organizador ---------- */
-  .abas { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: rgba(255,255,255,.08); padding: 4px; border-radius: 14px; margin-bottom: 16px; }
-  .abas button { height: 42px; border: 0; border-radius: 10px; background: none; font-weight: 700; color: var(--suave); }
-  .abas button[aria-selected="true"] { background: var(--amarelo); color: var(--tinta); }
-  .grupo h4 { margin: 20px 2px 8px; font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
-  .grupo h4 i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-  .resultado { margin-top: 16px; }
-  .resultado .status { background: rgba(255,255,255,.08); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
-  .resultado .status b { color: var(--amarelo); }
-  .vazio { color: var(--suave); text-align: center; padding: 24px 8px; font-size: 15px; }
-  .topo-org { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-  .topo-org a { color: var(--suave); font-size: 14px; }
 
   [hidden] { display: none !important; }
 
@@ -261,8 +242,7 @@
     <p class="grito" id="festaTit">Bingo!</p>
     <p id="festaTxt">Você fechou uma linha.</p>
     <p class="quem" id="festaQuem"></p>
-    <p class="cod">Cartela <b id="festaCod"></b></p>
-    <p style="margin-top:12px;font-size:14px;opacity:.75">Mostre esta tela pra organização conferir.</p>
+    <p style="margin-top:12px;font-size:14px;opacity:.75">Agora é gritar pro time ouvir.</p>
     <button class="btn" id="festaOk">Continuar jogando</button>
   </div>
 </div>
@@ -414,12 +394,6 @@ function embaralhar(arr, rnd) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
-const ALFA = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
-function codigoDe(nomeNorm) {
-  let h = hash32("cod|" + CONFIG.salt + "|" + nomeNorm), s = "";
-  for (let i = 0; i < 4; i++) { s += ALFA[h % ALFA.length]; h = Math.floor(h / ALFA.length) ^ (h << 5); h >>>= 0; }
-  return s;
-}
 
 /* Gera 24 músicas equilibradas entre gêneros, determinadas pelo nome. */
 function gerarCartela(nomeNorm) {
@@ -498,18 +472,16 @@ function telaEntrada() {
       <input class="campo" id="nome" name="nome" autocomplete="name" autocapitalize="words" placeholder="Ex.: Ana Souza" maxlength="60">
       <p class="erro" id="erroNome" role="alert"></p>
       <button class="btn" type="submit">Gerar minha cartela</button>
-      <p class="ajuda">Cada nome gera uma cartela própria, e é por ele que a organização confere o seu bingo. Use o mesmo nome em qualquer aparelho e a cartela será a mesma.</p>
+      <p class="ajuda">Cada nome gera uma cartela própria. Use o mesmo nome em qualquer aparelho e a cartela será a mesma.</p>
     </form>
     <section class="regras">
       <h2>Como jogar</h2>
       <ol>
         <li>Tocou uma música da sua cartela? <strong>Toque na casa</strong> pra marcar.</li>
         <li>Fechou uma linha, coluna ou diagonal: <strong>bingo de linha</strong>.</li>
-        <li>Marcou as 24 músicas: <strong>cartela cheia</strong>, o prêmio grande.</li>
-        <li>Mostre a tela pra organização, que confere pelo seu nome.</li>
+        <li>Marcou as 24 músicas: <strong>cartela cheia</strong>.</li>
       </ol>
-    </section>
-    <p class="rodape"><a href="#organizador">Modo organização</a></p>`;
+    </section>`;
   const form = $("#formNome"), campo = $("#nome");
   campo.addEventListener("input", () => { campo.removeAttribute("aria-invalid"); $("#erroNome").textContent = ""; });
   form.addEventListener("submit", e => {
@@ -534,7 +506,7 @@ function telaCartela() {
   const grade = gerarCartela(norm);
   const marcadas = new Set(store.get("marcas:" + norm, []));
   const avisos = store.get("avisos:" + norm, { linhas: 0, cheia: false });
-  estado = { nome, norm, grade, marcadas, avisos, codigo: codigoDe(norm) };
+  estado = { nome, norm, grade, marcadas, avisos };
   document.title = "Bingo · " + nome.split(" ")[0];
 
   $("#app").innerHTML = `
@@ -543,10 +515,7 @@ function telaCartela() {
       <h1>Bingo</h1>
     </header>
     <div class="jogador">
-      <div>
-        <div class="nome">${esc(nome)}</div>
-        <div class="codigo">Cartela <b>${estado.codigo}</b></div>
-      </div>
+      <div class="nome">${esc(nome)}</div>
       <button class="icone-btn" id="abrirOpcoes" aria-label="Opções">${IC.menu}</button>
     </div>
     <div class="placar">
@@ -560,8 +529,7 @@ function telaCartela() {
     <section class="lista">
       <div class="lista-topo"><h2>Suas músicas</h2><span>Em ordem alfabética</span></div>
       <ul class="musicas" id="lista"></ul>
-    </section>
-    <p class="rodape"><a href="#organizador">Modo organização</a></p>`;
+    </section>`;
 
   const gradeEl = $("#grade");
   gradeEl.innerHTML = grade.map((id, i) => {
@@ -665,7 +633,6 @@ function comemorar(titulo, texto) {
   $("#festaTit").textContent = titulo;
   $("#festaTxt").textContent = texto;
   $("#festaQuem").textContent = estado.nome;
-  $("#festaCod").textContent = estado.codigo;
   abrir("#veuFesta");
   if (navigator.vibrate) navigator.vibrate([60, 40, 120]);
   confete();
@@ -696,107 +663,12 @@ function confete() {
   })(t0);
 }
 
-/* =========================================================
-   TELA: organização
-   Marca o que tocou (salvo neste aparelho) e confere cartelas
-   pelo nome — o resultado vem do que tocou de verdade,
-   não do que o jogador marcou.
-   ========================================================= */
-function telaOrganizador() {
-  document.title = "Bingo · Organização";
-  const tocadas = new Set(store.get("org:tocadas", []));
-  $("#app").innerHTML = `
-    <header class="marca compacta"><span class="made">Made in Brasil</span><h1>Bingo</h1></header>
-    <div class="topo-org"><strong id="nTocadas"></strong><a href="#">Voltar pra cartela</a></div>
-    <div class="abas" role="tablist">
-      <button role="tab" aria-selected="true" data-aba="tocou">O que tocou</button>
-      <button role="tab" aria-selected="false" data-aba="conferir">Conferir cartela</button>
-    </div>
-    <section id="abaTocou">
-      <input class="campo" id="busca" type="search" placeholder="Buscar música ou artista" autocomplete="off">
-      <div id="grupos"></div>
-      <button class="btn sec" id="zerar" style="margin-top:24px">Zerar músicas tocadas</button>
-    </section>
-    <section id="abaConferir" hidden>
-      <form id="formConf" novalidate>
-        <label for="nomeConf" style="display:block;font-weight:700;margin-bottom:8px">Nome do jogador, como ele digitou</label>
-        <input class="campo" id="nomeConf" autocomplete="off" autocapitalize="words" placeholder="Ex.: Ana Souza">
-        <button class="btn" type="submit">Conferir</button>
-      </form>
-      <div class="resultado" id="resultado"></div>
-    </section>`;
-
-  const contar = () => { $("#nTocadas").textContent = `${tocadas.size} de ${MUSICAS.length} tocadas`; };
-
-  function desenharGrupos(filtro = "") {
-    const f = normalizar(filtro);
-    $("#grupos").innerHTML = Object.entries(GENEROS).map(([g, info]) => {
-      const itens = MUSICAS.filter(m => m.g === g && (!f || normalizar(m.titulo + " " + m.artista).includes(f)));
-      if (!itens.length) return "";
-      return `<div class="grupo"><h4><i style="background:${info.cor}"></i>${info.nome}</h4>
-        <ul class="musicas">${itens.map(m => `<li><button class="item${tocadas.has(m.id) ? " on" : ""}" data-m="${m.id}" aria-pressed="${tocadas.has(m.id)}">
-          <span class="chk">${IC.check}</span>
-          <span><span class="tit">${esc(m.titulo)}</span><span class="art">${esc(m.artista)}</span></span><span></span>
-        </button></li>`).join("")}</ul></div>`;
-    }).join("") || `<p class="vazio">Nenhuma música com “${esc(filtro)}”.</p>`;
-  }
-
-  desenharGrupos(); contar();
-  $("#busca").addEventListener("input", e => desenharGrupos(e.target.value));
-  $("#grupos").addEventListener("click", e => {
-    const b = e.target.closest("[data-m]"); if (!b) return;
-    const id = +b.dataset.m;
-    tocadas.has(id) ? tocadas.delete(id) : tocadas.add(id);
-    store.set("org:tocadas", [...tocadas]);
-    b.classList.toggle("on", tocadas.has(id)); b.setAttribute("aria-pressed", tocadas.has(id));
-    contar();
-  });
-  $("#zerar").addEventListener("click", () => {
-    if (!confirm("Zerar todas as músicas marcadas como tocadas?")) return;
-    tocadas.clear(); store.set("org:tocadas", []); desenharGrupos($("#busca").value); contar();
-  });
-
-  document.querySelectorAll("[data-aba]").forEach(b => b.addEventListener("click", () => {
-    document.querySelectorAll("[data-aba]").forEach(x => x.setAttribute("aria-selected", x === b));
-    $("#abaTocou").hidden = b.dataset.aba !== "tocou";
-    $("#abaConferir").hidden = b.dataset.aba !== "conferir";
-  }));
-
-  $("#formConf").addEventListener("submit", e => {
-    e.preventDefault();
-    const nome = $("#nomeConf").value.trim();
-    const norm = normalizar(nome);
-    if (!norm) { $("#resultado").innerHTML = `<p class="vazio">Digite o nome do jogador.</p>`; return; }
-    const grade = gerarCartela(norm);
-    const valendo = new Set(grade.map((id, i) => (id !== -1 && tocadas.has(id)) ? i : null).filter(i => i !== null));
-    const feitas = linhasFeitas(valendo);
-    const naLinha = new Set(feitas.flat());
-    const cheia = valendo.size === 24;
-    $("#resultado").innerHTML = `
-      <div class="status">
-        Cartela <b>${codigoDe(norm)}</b> confere com a tela do jogador?<br>
-        ${valendo.size}/24 músicas já tocaram, ${feitas.length} ${feitas.length === 1 ? "linha fechada" : "linhas fechadas"}.
-        ${cheia ? "<br><b>Cartela cheia válida.</b>" : feitas.length ? "<br><b>Bingo de linha válido.</b>" : ""}
-      </div>
-      <section class="cartela">
-        <div class="letras" aria-hidden="true"><span>B</span><span>I</span><span>N</span><span>G</span><span>O</span></div>
-        <div class="grade">${grade.map((id, i) => {
-          if (id === -1) return `<div class="casa livre">${IC.sol}<small>LIVRE</small></div>`;
-          const on = valendo.has(i);
-          return `<div class="casa c${(i * 2 + Math.floor(i / 5)) % 5}${on ? " on" : ""}${naLinha.has(i) ? " linha-feita" : ""}"><span class="tt">${esc(MUSICAS[id].titulo)}</span></div>`;
-        }).join("")}</div>
-      </section>`;
-    ajustarTextos();
-  });
-}
-
 /* ---------- Roteamento ---------- */
 function rota() {
   estado = null;
   const app = $("#app"), novo = app.cloneNode(false);
   app.replaceWith(novo); // remove ouvintes antigos
-  if (location.hash === "#organizador") telaOrganizador();
-  else if (store.get("jogador", null)) telaCartela();
+  if (store.get("jogador", null)) telaCartela();
   else telaEntrada();
   scrollTo(0, 0);
 }
